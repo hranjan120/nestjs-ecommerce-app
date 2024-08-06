@@ -1,19 +1,22 @@
-import { Body, Controller, Delete, Get, Patch, Post, Res, HttpStatus, Param } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post, Res, HttpStatus, Param, UseGuards, Req } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-users.dto';
 import { UpdateUserDto } from './dto/update-users.dto';
+import { AuthGuard } from '../common/auth/auth.guard';
+import { RolesGuard } from '../common/auth/role.guard';
 
 /*-------------*/
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) { }
 
-
+    /*-------------*/
     @Get()
     async sayHello() {
         return this.userService.getHello();
     }
 
+    /*-------------*/
     @Post('add-new')
     async addNewUser(@Res() res, @Body() createUserDto: CreateUserDto) {
         try {
@@ -26,6 +29,7 @@ export class UserController {
         }
     }
 
+    /*-------------*/
     @Patch('update-single/:id')
     async updateSingleUser(@Res() res, @Param('id') userId: string, @Body() updateUserDto: UpdateUserDto) {
         try {
@@ -38,9 +42,12 @@ export class UserController {
         }
     }
 
+    /*-------------*/
+    @UseGuards(AuthGuard, new RolesGuard('USER', 'CREATE'))
     @Get('fetch-all')
-    async fetchAllUser(@Res() res) {
+    async fetchAllUser(@Req() req, @Res() res) {
         try {
+            console.log(req.decodedUser);
             const allUsers = await this.userService.getAllUsers();
             return res.status(HttpStatus.OK).json({ success: true, statusCode: HttpStatus.OK, message: 'User data', allUsers });
         } catch (err) {
@@ -62,6 +69,7 @@ export class UserController {
         }
     }
 
+    /*-------------*/
     @Delete('delete/:id')
     async removeUser(@Res() res, @Param('id') userId: string) {
         try {
