@@ -8,8 +8,8 @@ import { IndexModule } from './index/index.module';
 import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
 import { OrderModule } from './order/order.module';
-import { MongooseModule } from '@nestjs/mongoose';
-import { JwtModule } from '@nestjs/jwt';
+import { DatabaseModule } from './common/module/database.module';
+import { JWTModule } from './common/module/jwt.module';
 
 
 @Module({
@@ -17,12 +17,8 @@ import { JwtModule } from '@nestjs/jwt';
     ConfigModule.forRoot({
       envFilePath: `.env.${process.env.NODE_ENV}`,
     }),
-    MongooseModule.forRoot(process.env.MONGODB_URL),
-    JwtModule.register({
-      global: true,
-      secret: process.env.JWT_KEY,
-      signOptions: { expiresIn: '60s' },
-    }),
+    DatabaseModule,
+    JWTModule,
     IndexModule, StoreModule, UserModule, OrderModule
   ],
   controllers: [AppController],
