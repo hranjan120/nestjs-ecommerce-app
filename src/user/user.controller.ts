@@ -5,12 +5,12 @@ import { CreateUserDto } from './dto/create-users.dto';
 import { UpdateUserDto } from './dto/update-users.dto';
 import { AuthGuard } from '../common/auth/auth.guard';
 import { RolesGuard } from '../common/auth/role.guard';
-
+import { RedisService } from '../common/module/redis/redis.service';
 
 /*-------------*/
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService: UserService) { }
+    constructor(private readonly userService: UserService, private readonly redisService: RedisService) { }
 
     /*-------------*/
     @Get()
@@ -49,6 +49,9 @@ export class UserController {
     @Get('fetch-all')
     async fetchAllUser(@Req() req: EcomAppRequest, @Res() res: EcomAppResponse) {
         try {
+            await this.redisService.set('userdata', 'username', 'Test User');
+            const userData = await this.redisService.get('userdata', 'username');
+            console.log(userData);
             console.log(req.decodedUser);
             const allUsers = await this.userService.getAllUsers();
             return res.status(HttpStatus.OK).json({ success: true, statusCode: HttpStatus.OK, message: 'User data', allUsers });

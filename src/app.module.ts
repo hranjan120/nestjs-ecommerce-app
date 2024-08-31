@@ -8,8 +8,8 @@ import { IndexModule } from './index/index.module';
 import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
 import { OrderModule } from './order/order.module';
-import { DatabaseModule } from './common/module/database.module';
-import { JWTModule } from './common/module/jwt.module';
+import { DatabaseModule } from './common/module/database/database.module';
+import { JWTModule } from './common/module/jwt/jwt.module';
 
 
 @Module({
