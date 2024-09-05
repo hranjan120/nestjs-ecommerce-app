@@ -6,11 +6,16 @@ import { UpdateUserDto } from './dto/update-users.dto';
 import { AuthGuard } from '../common/auth/auth.guard';
 import { RolesGuard } from '../common/auth/role.guard';
 import { RedisService } from '../common/module/redis/redis.service';
+import { OpenSearchService } from '../common/module/opensearch/opensearch.service';
 
 /*-------------*/
 @Controller('user')
 export class UserController {
-    constructor(private readonly userService: UserService, private readonly redisService: RedisService) { }
+    constructor(
+        private readonly userService: UserService,
+        private readonly redisService: RedisService,
+        private readonly openSearchService: OpenSearchService
+    ) { }
 
     /*-------------*/
     @Get()
@@ -49,9 +54,6 @@ export class UserController {
     @Get('fetch-all')
     async fetchAllUser(@Req() req: EcomAppRequest, @Res() res: EcomAppResponse) {
         try {
-            await this.redisService.set('userdata', 'username', 'Test User');
-            const userData = await this.redisService.get('userdata', 'username');
-            console.log(userData);
             console.log(req.decodedUser);
             const allUsers = await this.userService.getAllUsers();
             return res.status(HttpStatus.OK).json({ success: true, statusCode: HttpStatus.OK, message: 'User data', allUsers });
@@ -84,6 +86,35 @@ export class UserController {
         } catch (err) {
             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
                 success: false, statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error: User not created!', error: 'Bad Request'
+            });
+        }
+    }
+
+    /*-------------*/
+    @Get('chk-redish')
+    async checkRedis(@Res() res: EcomAppResponse) {
+        try {
+            await this.redisService.set('userdata', 'username', 'Test User');
+            const userData = await this.redisService.get('userdata', 'username');
+
+            return res.status(HttpStatus.OK).json({ success: true, statusCode: HttpStatus.OK, message: 'Redis Working', userData });
+        } catch (err) {
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                success: false, statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error: Redis not working!', error: 'Bad Request'
+            });
+        }
+    }
+
+    /*-------------*/
+    @Get('chk-opensearch')
+    async checkOpensearch(@Res() res: EcomAppResponse) {
+        try {
+            const opensearchRes = await this.openSearchService.createIndex('testing_index_1');
+
+            return res.status(HttpStatus.OK).json({ success: true, statusCode: HttpStatus.OK, message: 'Opensearch Working', opensearchRes });
+        } catch (err) {
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                success: false, statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error: Index not created!', error: 'Bad Request'
             });
         }
     }
