@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { OrderModule } from './order/order.module';
 import { DatabaseModule } from './common/module/database/database.module';
 import { JWTModule } from './common/module/jwt/jwt.module';
+import { KafkaModule } from './common/module/kafka/kafka.module';
 
 
 @Module({
@@ -19,6 +20,7 @@ import { JWTModule } from './common/module/jwt/jwt.module';
     }),
     DatabaseModule,
     JWTModule,
+    KafkaModule,
     IndexModule, StoreModule, UserModule, OrderModule
   ],
   controllers: [AppController],

@@ -7,6 +7,8 @@ import { AuthGuard } from '../common/auth/auth.guard';
 import { RolesGuard } from '../common/auth/role.guard';
 import { RedisService } from '../common/module/redis/redis.service';
 import { OpenSearchService } from '../common/module/opensearch/opensearch.service';
+import { KafkaService } from '../common/module/kafka/kafka.service';
+
 
 /*-------------*/
 @Controller('user')
@@ -14,7 +16,8 @@ export class UserController {
     constructor(
         private readonly userService: UserService,
         private readonly redisService: RedisService,
-        private readonly openSearchService: OpenSearchService
+        private readonly openSearchService: OpenSearchService,
+        private readonly kafkaService: KafkaService
     ) { }
 
     /*-------------*/
@@ -112,6 +115,29 @@ export class UserController {
             const opensearchRes = await this.openSearchService.createIndex('testing_index_1');
 
             return res.status(HttpStatus.OK).json({ success: true, statusCode: HttpStatus.OK, message: 'Opensearch Working', opensearchRes });
+        } catch (err) {
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                success: false, statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error: Index not created!', error: 'Bad Request'
+            });
+        }
+    }
+
+    /*-------------*/
+    @Get('chk-kafka')
+    async checkKafka(@Res() res: EcomAppResponse) {
+        try {
+            //await this.kafkaService.createTopic('SAMPLE-TOPIC');
+            //const topicList = await this.kafkaService.listTopic();
+
+            const userData = {
+                name: "John Doe",
+                email: "john@example.com",
+                isActive: true,
+                role: "admin"
+            };
+            await this.kafkaService.sendMessage('SAMPLE-TOPIC', userData);
+
+            return res.status(HttpStatus.OK).json({ success: true, statusCode: HttpStatus.OK, message: 'Kafka Working', });
         } catch (err) {
             return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
                 success: false, statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error: Index not created!', error: 'Bad Request'
